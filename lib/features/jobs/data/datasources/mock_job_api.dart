@@ -3,149 +3,158 @@ import 'dart:math';
 import '../../domain/entities/job_match.dart';
 
 class MockJobApi {
-  MockJobApi();
-
-  final _random = Random();
+  final Random random = Random();
 
   Future<List<JobMatch>> getMatches({
     String country = 'All',
     int page = 1,
   }) async {
-    await _simulateNetworkDelay();
+    await Future.delayed(
+      Duration(milliseconds: 800 + random.nextInt(700)),
+    );
 
-    if (_shouldFail()) {
+    if (random.nextInt(5) == 0) {
       throw Exception('Server error');
     }
 
     final countries = ['UAE', 'Saudi Arabia', 'Qatar'];
-    final jobList = <JobMatch>[];
+
+    final titles = [
+      'Heavy Truck Driver',
+      'Electrician',
+      'Welder',
+      'Retail Sales Associate',
+      'Housekeeping Supervisor',
+      'Forklift Operator',
+      'Construction Worker',
+      'HVAC Technician',
+      'Kitchen Helper',
+      'Security Guard',
+    ];
+
+    final employers = [
+      'Logistics company',
+      'Facility management group',
+      'Construction firm',
+      'Retail chain',
+      'Hospitality group',
+      'Industrial services company',
+    ];
+
+    final cities = {
+      'UAE': ['Dubai', 'Abu Dhabi', 'Sharjah'],
+      'Saudi Arabia': ['Riyadh', 'Jeddah', 'Dammam'],
+      'Qatar': ['Doha', 'Al Rayyan', 'Al Wakrah'],
+    };
+
+    final jobs = <JobMatch>[];
 
     for (int i = 0; i < 200; i++) {
-      final countryName = countries[i % countries.length];
-      final filteredCountry = country == 'All' || countryName == country;
-      if (!filteredCountry) {
+      final jobCountry = countries[i % 3];
+
+      if (country != 'All' && country != jobCountry) {
         continue;
       }
 
-      final titlePool = [
-        'Heavy Truck Driver',
-        'Electrician',
-        'Welder',
-        'Retail Sales Associate',
-        'Housekeeping Supervisor',
-        'Forklift Operator',
-        'Construction Worker',
-        'HVAC Technician',
-        'Kitchen Helper',
-        'Security Guard',
-      ];
+      final title = titles[i % titles.length];
 
-      final employerPool = [
-        'Logistics company',
-        'Facility management group',
-        'Construction firm',
-        'Retail chain',
-        'Hospitality group',
-        'Industrial services company',
-      ];
-
-      final cityPool = {
-        'UAE': ['Dubai', 'Abu Dhabi', 'Sharjah'],
-        'Saudi Arabia': ['Riyadh', 'Jeddah', 'Dammam'],
-        'Qatar': ['Doha', 'Al Rayyan', 'Al Wakrah'],
-      };
-
-      final countryKey = countryName;
-      final city = cityPool[countryKey]![i % cityPool[countryKey]!.length];
-      final title = titlePool[i % titlePool.length];
-      final matchScore = 68 + (i % 30) + (_random.nextDouble() * 10);
-      final minSalary = 2000 + ((i * 111) % 2600);
-      final maxSalary = minSalary + 600 + ((i * 67) % 1200);
-
-      jobList.add(
+      final salary = 2000 + (i * 111) % 2600;
+// 2000 — minimum starting salary.
+// i * 111 — generates a changing number for each job.
+// % 2600 — keeps the result between 0 and 2599.
+// 2000 + — makes the salary range from ₹2,000 to ₹4,599.
+      jobs.add(
         JobMatch(
           id: 'job_${1000 + i}',
           title: title,
-          employerDisplay: '${employerPool[i % employerPool.length]}, $countryKey',
-          country: countryKey,
-          city: city,
-          salaryMinAed: minSalary,
-          salaryMaxAed: maxSalary,
-          matchScore: double.parse(matchScore.toStringAsFixed(1)),
+          employerDisplay: '${employers[i % employers.length]}, $jobCountry',
+          country: jobCountry,
+          city: cities[jobCountry]![i % 3],
+          salaryMinAed: salary,
+          salaryMaxAed: salary + 600 + (i * 67) % 1200,
+          matchScore: 68 + (i % 30) + random.nextDouble() * 10,
           matchReason:
               '${(i % 8) + 3} years of relevant experience and valid work documentation',
-          skills: _skillsForJob(title),
+          skills: getSkills(title),
           benefits: JobBenefits(
             accommodation: i % 2 == 0,
             food: i % 3 != 0,
             visa: true,
           ),
-          description: 'Work in a structured environment with transport, safe conditions, and supportive management.',
+          description:
+              'Work in a structured environment with transport, safe conditions, and supportive management.',
           requirements: [
             'Minimum 1+ years relevant experience',
             'Valid identification and work documents',
             'Ability to work in a team environment',
           ],
-          postedAt: DateTime.now().subtract(Duration(days: i % 21)),
+          postedAt: DateTime.now().subtract(
+            Duration(days: i % 21),
+          ),
         ),
       );
     }
 
-    jobList.sort((a, b) => b.matchScore.compareTo(a.matchScore));
+    jobs.sort(
+      (a, b) => b.matchScore.compareTo(a.matchScore),
+    );
 
     final start = (page - 1) * 20;
-    final end = start + 20;
-    return jobList.sublist(
-      start,
-      end > jobList.length ? jobList.length : end,
-    );
+    final end = min(start + 20, jobs.length);
+
+    return jobs.sublist(start, end);
   }
 
   Future<JobMatch> getJobById(String id) async {
-    await _simulateNetworkDelay();
+    await Future.delayed(
+      Duration(milliseconds: 800 + random.nextInt(700)),
+    );
 
-    if (_shouldFail()) {
+    if (random.nextInt(5) == 0) {
       throw Exception('Server error');
     }
 
-    final allJobs = await getMatches(country: 'All');
-    final match = allJobs.firstWhere(
-      (job) => job.id == id,
-      orElse: () => allJobs.first,
-    );
+    final jobs = await getMatches();
 
-    return match;
+    return jobs.firstWhere(
+      (job) => job.id == id,
+      orElse: () => jobs.first,
+    );
   }
 
   Future<void> applyForJob(String id) async {
-    await _simulateNetworkDelay();
+    await Future.delayed(
+      Duration(milliseconds: 800 + random.nextInt(700)),
+    );
 
-    if (_shouldFail()) {
+    if (random.nextInt(5) == 0) {
       throw Exception('Apply failed');
     }
   }
 
-  Future<void> _simulateNetworkDelay() async {
-    final delayMs = 800 + _random.nextInt(700);
-    await Future<void>.delayed(Duration(milliseconds: delayMs));
-  }
+  List<String> getSkills(String title) {
+    if (title == 'Heavy Truck Driver') {
+      return ['Heavy vehicle', 'Route planning', 'GCC licence'];
+    } else if (title == 'Electrician') {
+      return ['Electrical repair', 'Wiring', 'Safety checks'];
+    } else if (title == 'Welder') {
+      return ['Arc welding', 'Metal work', 'Safety gear'];
+    } else if (title == 'Retail Sales Associate') {
+      return ['Cash handling', 'Customer service', 'Stocking'];
+    } else if (title == 'Housekeeping Supervisor') {
+      return ['Cleaning', 'Team management', 'Guest service'];
+    } else if (title == 'Forklift Operator') {
+      return ['Forklift', 'Loading', 'Warehouse safety'];
+    } else if (title == 'Construction Worker') {
+      return ['Site work', 'Tool use', 'Safety'];
+    } else if (title == 'HVAC Technician') {
+      return ['AC repair', 'Maintenance', 'Diagnostics'];
+    } else if (title == 'Kitchen Helper') {
+      return ['Food prep', 'Sanitation', 'Team support'];
+    } else if (title == 'Security Guard') {
+      return ['Surveillance', 'Reporting', 'Patrol'];
+    }
 
-  bool _shouldFail() => _random.nextInt(5) == 0;
-
-  List<String> _skillsForJob(String title) {
-    final map = {
-      'Heavy Truck Driver': ['Heavy vehicle', 'Route planning', 'GCC licence'],
-      'Electrician': ['Electrical repair', 'Wiring', 'Safety checks'],
-      'Welder': ['Arc welding', 'Metal work', 'Safety gear'],
-      'Retail Sales Associate': ['Cash handling', 'Customer service', 'Stocking'],
-      'Housekeeping Supervisor': ['Cleaning', 'Team management', 'Guest service'],
-      'Forklift Operator': ['Forklift', 'Loading', 'Warehouse safety'],
-      'Construction Worker': ['Site work', 'Tool use', 'Safety'],
-      'HVAC Technician': ['AC repair', 'Maintenance', 'Diagnostics'],
-      'Kitchen Helper': ['Food prep', 'Sanitation', 'Team support'],
-      'Security Guard': ['Surveillance', 'Reporting', 'Patrol'],
-    };
-
-    return map[title] ?? ['Relevant experience', 'Safety', 'Teamwork'];
+    return ['Relevant experience', 'Safety', 'Teamwork'];
   }
 }

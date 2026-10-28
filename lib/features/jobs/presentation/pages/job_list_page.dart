@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../interview/data/repositories/interview_repository_impl.dart';
+import '../../../interview/presentation/bloc/interview_bloc.dart';
+import '../../../interview/presentation/pages/interview_join_page.dart';
 import '../bloc/job_bloc.dart';
 import 'job_details_page.dart';
 
@@ -134,6 +137,51 @@ class JobListPage extends StatelessWidget {
                                     ),
                                   )
                                   .toList(),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFEAF1FF),
+                              borderRadius: BorderRadius.circular(18),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: const [
+                                      Text(
+                                        'Your interview',
+                                        style: TextStyle(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      SizedBox(height: 6),
+                                      Text('Meeting code: JZ-8P4Q'),
+                                    ],
+                                  ),
+                                ),
+                                ElevatedButton.icon(
+                                  onPressed: () {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (_) => BlocProvider(
+                                          create: (_) => InterviewBloc(
+                                            repository: InterviewRepositoryImpl(),
+                                          ),
+                                          child: const InterviewJoinPage(),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  icon: const Icon(Icons.video_call_rounded),
+                                  label: const Text('Join'),
+                                ),
+                              ],
                             ),
                           ),
                           const SizedBox(height: 16),
