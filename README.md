@@ -160,9 +160,3 @@ flutter test
 
 ---
 
-## 10) Next improvements (optional)
-
-- Connect interview flow to real backend join API
-- Add full i18n (English/Hindi) labels for all interview UI text
-- Add more unit tests for interview service and bloc
-- Add full remote participant video tiles from real meeting data
