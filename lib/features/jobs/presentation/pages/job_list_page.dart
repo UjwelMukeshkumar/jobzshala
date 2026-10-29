@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:jobzshala/features/interview/domain/repositories/interview_repository.dart';
 
-import '../../../interview/data/repositories/interview_repository_impl.dart';
 import '../../../interview/presentation/bloc/interview_bloc.dart';
 import '../../../interview/presentation/pages/interview_join_page.dart';
 import '../bloc/job_bloc.dart';

@@ -7,9 +7,8 @@ part 'interview_event.dart';
 part 'interview_state.dart';
 
 class InterviewBloc extends Bloc<InterviewEvent, InterviewState> {
-  InterviewBloc({required InterviewRepository repository})
-      : _repository = repository,
-        super(InterviewInitial()) {
+  InterviewBloc({required this._repository})
+      : super(InterviewInitial()) {
     on<JoinInterview>(_onJoinInterview);
     on<LeaveInterview>(_onLeaveInterview);
     on<ToggleMute>(_onToggleMute);

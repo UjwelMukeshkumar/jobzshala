@@ -4,7 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 
 import '../../domain/entities/interview_session.dart';
-import '../../services/chime_bridge.dart';
+import '../../services/interview_service.dart';
 import '../widgets/web_camera_view.dart';
 
 class InterviewCallPage extends StatefulWidget {
@@ -18,7 +18,9 @@ class InterviewCallPage extends StatefulWidget {
 
 class _InterviewCallPageState extends State<InterviewCallPage>
     with WidgetsBindingObserver {
+  final InterviewService _interviewService = InterviewService();
   late final StreamSubscription<Map<String, dynamic>> _subscription;
+  late InterviewSession _session;
   bool _isMuted = false;
   bool _cameraEnabled = true;
   bool _isReconnecting = false;
@@ -29,12 +31,13 @@ class _InterviewCallPageState extends State<InterviewCallPage>
   @override
   void initState() {
     super.initState();
+    _session = widget.session;
     _isMuted = widget.session.isMuted;
     _cameraEnabled = widget.session.cameraEnabled;
     _participantCount = widget.session.participantCount;
     _startTimer();
     WidgetsBinding.instance.addObserver(this);
-    _subscription = ChimeBridge.events.listen((event) {
+    _subscription = _interviewService.events.listen((event) {
       final eventName = event['event'] as String? ?? '';
       final payload = event['payload'] as Map<String, dynamic>? ?? const {};
 
@@ -71,14 +74,14 @@ class _InterviewCallPageState extends State<InterviewCallPage>
     WidgetsBinding.instance.removeObserver(this);
     _subscription.cancel();
     _timer?.cancel();
-    ChimeBridge.leaveMeeting();
+    _interviewService.leaveMeeting(_session);
     super.dispose();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.inactive || state == AppLifecycleState.paused) {
-      ChimeBridge.leaveMeeting();
+      _interviewService.leaveMeeting(_session);
     }
   }
 
@@ -94,17 +97,17 @@ class _InterviewCallPageState extends State<InterviewCallPage>
   Future<void> _toggleMute() async {
     final muted = !_isMuted;
     setState(() => _isMuted = muted);
-    await ChimeBridge.toggleMute(muted: muted);
+    _session = await _interviewService.toggleMute(_session, muted);
   }
 
   Future<void> _toggleCamera() async {
     final enabled = !_cameraEnabled;
     setState(() => _cameraEnabled = enabled);
-    await ChimeBridge.toggleCamera(enabled: enabled);
+    _session = await _interviewService.toggleCamera(_session, enabled);
   }
 
   Future<void> _switchCamera() async {
-    await ChimeBridge.switchCamera();
+    _session = await _interviewService.switchCamera(_session);
   }
 
   String _formatTimer(Duration duration) {
@@ -302,7 +305,7 @@ class _InterviewCallPageState extends State<InterviewCallPage>
                       label: 'Leave',
                       onPressed: () async {
                         final navigationContext = context;
-                        await ChimeBridge.leaveMeeting();
+                        _session = await _interviewService.leaveMeeting(_session);
                         if (!mounted) return;
                         if (!navigationContext.mounted) return;
                         Navigator.of(navigationContext).maybePop();

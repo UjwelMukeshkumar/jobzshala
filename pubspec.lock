@@ -102,6 +102,14 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  flutter_amazon_chime:
+    dependency: "direct main"
+    description:
+      name: flutter_amazon_chime
+      sha256: b5f188f0fd9ad2b2a8f3ee89afac176e5ff95c9303e97580973cc0aa105a56ee
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.1.2"
   flutter_bloc:
     dependency: "direct main"
     description:
@@ -184,6 +192,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "6.1.0"
+  logger:
+    dependency: transitive
+    description:
+      name: logger
+      sha256: "2a0dc097e7b01d942475bdd552356db2d0f768b05540bd4b2b53f1840f2239a7"
+      url: "https://pub.dev"
+    source: hosted
+    version: "2.8.0"
   matcher:
     dependency: transitive
     description:
