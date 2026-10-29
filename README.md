@@ -1,6 +1,5 @@
 # Jobzshala
 
-Simple Flutter app for the Jobzshala GCC assignment.
 
 This app includes:
 - **Part A:** Job matches flow (list, details, apply)
